@@ -1,21 +1,18 @@
-Backup Your Site With Amazon S3
-=============
+# Backup Your Site With Amazon S3 #
 
 **In a nutshell, I created a PHP script that archives a specific folder and database then uploads the archives to an Amazon S3 bucket for safe keeping.  Here's how it works, hopefully it can help you get your backups in order.**
 
-The Concept
------------
+## The Concept ##
 
 I was looking for a way to automate the backup process of an important site.  Currently, we were backing up the database and file system locally.  Better than nothing, but what good were those backups if our server's hard drive crashed?  We needed some kind of remote solution.
 
 Amazon Web Services seemed like a perfect fit: all our data stored remotely and pricing based primarily on bandwidth (the only time we'd be accessing this data was a failure).  However, my previous experience with AWS made me a bit nervous to go this route since their API model made it a bit different than traditional file systems.  Thankfully, the entire set up was pretty painless thanks to their well-documented SDK.
 
-The Process
------------
+## The Process ##
 
 Before I go into the process in detail, I should warn you that you'll need both FTP and shell access to your web server and some moderate familiarity with both Linux commands and PHP to get this set up.  However, I figured most of this stuff out by Google-ing around and doing lots of reading, so I'd say at least give it a try.
 
-## Create an S3 account
+### Create an S3 account
 
 Setting up an S3 account is simple.  Visit [http://aws.amazon.com/s3/](http://aws.amazon.com/s3/) and select the "Sign Up Now" button.  If you already have an Amazon account, you can log in with it, or you can just create a new account.  (There are [plenty of resources](http://www.youtube.com/watch?v=5Qfuq4TRRMg) for creating an S3 account if you're having trouble.)
 
@@ -25,13 +22,13 @@ Here's a pretty realistic example: Let's say I'm backing up a 1Gb file system an
 
 Once you've created your S3 account, visit [the AWS Access Credentials section](https://aws-portal.amazon.com/gp/aws/securityCredentials) to get the Access Key ID and the Secret Access Key.  Be sure not to give out the Secret Access Key as that's essentially your password for your AWS account.  Keep these two on hand, you'll need them when we configure the backup script.
 
-## Download the code
+### Download the code
 
 **First, download the code.**  (Note: the archive includes [the Amazon S3 SDK for PHP](http://aws.amazon.com/sdkforphp/); feel free to download and include the latest version if you're a fan of hacking around.)
 
 You'll need to decide where to install.  I recommend you put this somewhere *not* publicly accessible since I presume you don't want the world getting at your backups or your AWS credentials.  One level above your `public_html` folder should do fine.  Upload the contents of this archive there.
 
-## Set up the code
+### Configure the code
 
 Next, you need to edit two files: 
 
@@ -52,7 +49,7 @@ Next, you need to edit two files:
 
 Once you set these up, you should be able to run "php s3_backup.php" and after a minute or two (depending on the size of what you're backing up), a local archive of the file system and database should be created and uploaded to your S3 bucket.  More on how to get to these momentarily...
 
-## Set up the cron tasks
+### Set up the cron tasks
 
 This backup magic is great, but what you really want is to "set it and forget it".  You want this backup happening nightly.  To do this, you'll need to edit your crontab by typing 'crontab -e' when logged into your server via shell.  What comes up might look a bit intimidating, but you'll basically want to add two lines:
 
@@ -69,7 +66,7 @@ In case you've never done this (or used vi) before, press 'I' to switch to edit 
 
 Check out this resource for more [help with crontabs](http://www.adminschoice.com/crontab-quick-reference).
 
-## Get to your backups
+### Get to your backups
 
 Now that the code is installed and it's being run nightly, your backup system is working!  An email should get sent out to you whenever the script is run successfully.
 
