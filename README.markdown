@@ -66,7 +66,7 @@ In case you've never done this (or used vi) before, press 'I' to switch to edit 
 
 Check out this resource for more [help with crontabs](http://www.adminschoice.com/crontab-quick-reference).
 
-### Get to your backups
+## Get to your backups
 
 Now that the code is installed and it's being run nightly, your backup system is working!  An email should get sent out to you whenever the script is run successfully.
 
