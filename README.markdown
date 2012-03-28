@@ -1,31 +1,17 @@
-# Outline
+Backup Your Site With Amazon S3
+=============
 
-- The Concept
-- The Code
-- The Process
-	- Create an S3 account
-	- Set up the code
-	- Set up the cron tasks
-	- Get to your backups
-	- Rest easy
-    
-# The Concept
+**In a nutshell, I created a PHP script that archives a specific folder and database then uploads the archives to an Amazon S3 bucket for safe keeping.  Here's how it works, hopefully it can help you get your backups in order.**
 
-Backups are the insurance of the internet.  Like insurance, you often don't think about them until you need them and it's usually too late.
+The Concept
+-----------
 
-I was looking for a way to automate the backup process of Simply Recipes.  Each night we were backing up both the database and file system locally.  Better than nothing, but what good were those backups if our server's hard drive crashed?  We needed some kind of remote solution.
+I was looking for a way to automate the backup process of an important site.  Currently, we were backing up the database and file system locally.  Better than nothing, but what good were those backups if our server's hard drive crashed?  We needed some kind of remote solution.
 
-Amazon Web Services seemed like a perfect fit: all our data stored remotely.  This was especially since their pricing is based primarily on traffic, and the only time we'd be accessing this data was if there a major problem on the server.  However, my previous experience with AWS made me a bit nervous to go this route since their API model made it a bit different than traditional file systems.  Thankfully, the entire set up was pretty painless thanks to their well-documented SDK.
+Amazon Web Services seemed like a perfect fit: all our data stored remotely and pricing based primarily on bandwidth (the only time we'd be accessing this data was a failure).  However, my previous experience with AWS made me a bit nervous to go this route since their API model made it a bit different than traditional file systems.  Thankfully, the entire set up was pretty painless thanks to their well-documented SDK.
 
-In a nutshell, I created a PHP script that archives a specific folder and database.  These archives are then uploaded automatically to an Amazon S3 bucket for safe keeping.  Here's how it works, hopefully it can help you get your backups in order.
-
-# The Code
-
-Here's the backup code in its entirety.  I'll be walking through how to set it up it shortly. 
-
-[ CODE ]
-
-# The Process
+The Process
+-----------
 
 Before I go into the process in detail, I should warn you that you'll need both FTP and shell access to your web server and some moderate familiarity with both Linux commands and PHP to get this set up.  However, I figured most of this stuff out by Google-ing around and doing lots of reading, so I'd say at least give it a try.
 
