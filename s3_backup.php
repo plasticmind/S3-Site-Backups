@@ -21,6 +21,7 @@
 	$db_name   = 'DB_NAME';
 	$db_user   = 'DB_USERNAME';
 	$db_pwd    = 'DB_PASSWORD';
+	$s3_region = 'US';		     // Format eg. REGION_EU_W1
 
 // <--- STOP EDITING!
 
@@ -29,7 +30,14 @@
 // Set up the AmazonS3 class
 	require_once './s3/sdk.class.php';
 	$s3 = new AmazonS3();
-	
+	$s3->enable_path_style(TRUE); 
+	 
+// Set s3 region if NOT within the US Standard	
+	if ($s3_region != 'US') 
+	{
+        	$s3->set_region(AmazonS3::$s3_region);
+	}
+	 
 // Zip directory for backing up
 	$asset_archive_filename = 'backup-files-' . $date . '.tar.gz';
 	$asset_archive = $archive_path . $asset_archive_filename;
