@@ -21,12 +21,12 @@
 	
 	$path_to_archive = './public_html/'; // The local path we want to back up
 	$db_host   = 'localhost';
-	$db_names   = array('DB_NAME1', 'DB_NAME2'); //Use array('DB_NAME1') for only one array. No limit.
-	$db_user   = 'DB_USERNAME';
+	$db_names   = array('DB_NAME1', 'DB_NAME2'); // Use array('DB_NAME1') for only one array. No limit.
+	$db_user   = 'DB_USERNAME'; // Current script only allows one user/pass for all databases
 	$db_pwd    = 'DB_PASSWORD';
+	$s3_region = 'US'; // Format eg. REGION_EU_W1
 
 // <--- STOP EDITING!
-
 
 
 // Set up the AmazonS3 class
@@ -38,6 +38,13 @@
 		exec("(rm $archive_path"."*.gz) &> /dev/null ");
 	}	
 	
+	$s3->enable_path_style(TRUE); 
+	 
+// Set s3 region if NOT within the US Standard	
+	if ($s3_region != 'US') {
+        $s3->set_region(AmazonS3::$s3_region);
+	}
+	 
 // Zip directory for backing up
 	$asset_archive_filename = 'backup-files-' . $date . '.tar.gz';
 	$asset_archive = $archive_path . $asset_archive_filename;
