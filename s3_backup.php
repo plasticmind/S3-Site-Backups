@@ -3,22 +3,25 @@
 /*
  * Archive and backup to Amazon S3 for Simply Recipes
  * by Jesse Gardner, 03.28.2012
+ * Modified for multiple databases by Carolos Foscolos, 04.11.2012
  */
 
  // Global variables
  
  // START EDITING --->
  
-  	$bucket = 'UNIQUE_BUCKETNAME_12345'; // Amazon requires this to be unique
+  	$bucket = 'UNIQUE_BUCKETNAME_12345'; // Amazon requires this to be unique. Make the bucket on amazon first to make sure the name is valid.
 	$archive_path = './backups/'; // This is where we're going to put our local backups
+	$empty_archivepath = false; // WARNING: If this is enabled the backups directory will be cleared before backup starts, if not enabled will fill up your server.
+	
 	$expire_after = 30; // How many days should Amazon hold on to a backup?
 	$notify_email = 'youremail@example.com'; // Comma-separated list of email address to notify on successful backup
-	$notify_sitename = 'Example.com' // Name to use for email notification subject line
+	$notify_sitename = 'Site Backups'; // Name to use for email notification subject line
 	$date = date("Y-m-d");
 	
 	$path_to_archive = './public_html/'; // The local path we want to back up
 	$db_host   = 'localhost';
-	$db_name   = 'DB_NAME';
+	$db_names   = array('DB_NAME1', 'DB_NAME2'); //Use array('DB_NAME1') for only one array. No limit.
 	$db_user   = 'DB_USERNAME';
 	$db_pwd    = 'DB_PASSWORD';
 
@@ -29,28 +32,41 @@
 // Set up the AmazonS3 class
 	require_once './s3/sdk.class.php';
 	$s3 = new AmazonS3();
+
+// Empty backup directory
+	if ($empty_archivepath) {
+		exec("(rm $archive_path"."*.gz) &> /dev/null ");
+	}	
 	
 // Zip directory for backing up
 	$asset_archive_filename = 'backup-files-' . $date . '.tar.gz';
 	$asset_archive = $archive_path . $asset_archive_filename;
 	
-	// Tar gz for better compression
-	exec("(tar -czf $asset_archive $path_to_archive) &> /dev/null");
+	// Zip
+	exec("(tar -cvzf $asset_archive $path_to_archive) &> /dev/null ");
+
 	$asset_archive_size = byteConvert(filesize($asset_archive));
 	
 	// Add to S3 upload batch
 	$s3->batch()->create_object($bucket, $asset_archive_filename, array('fileUpload' => $asset_archive ));
 
-// Dump database for backing up 
-	$db_archive_filename = 'backup-db-' . $date . '.sql.gz';
-	$db_archive = $archive_path . $db_archive_filename;
+    $summary = '';
 
-	// Dump
-	exec("(mysqldump --opt -h$db_host -u$db_user -p$db_pwd $db_name | gzip -9c > $db_archive) &> /dev/null");
-	$db_archive_size = byteConvert(filesize($db_archive));
-	
-	// Add to S3 upload batch
-	$s3->batch()->create_object($bucket, $db_archive_filename, array('fileUpload' => $db_archive ));
+// Dump databases for backing up 
+
+	foreach ($db_names as $db_name) {
+		$db_archive_filename = 'backup-db-'. str_replace('_','-',$db_name) . $date . '.sql.gz';
+		$db_archive = $archive_path . $db_archive_filename;
+
+		// Dump
+		exec("(mysqldump --opt --host=$db_host --user=\"$db_user\" --password=\"$db_pwd\" \"$db_name\" | gzip -9c > $db_archive) &> /dev/null ");
+		$db_archive_size = byteConvert(filesize($db_archive));
+
+		$summary .= "Database archive: $db_archive_filename ($db_archive_size)\n";
+		
+		// Add to S3 upload batch
+		$s3->batch()->create_object($bucket, $db_archive_filename, array('fileUpload' => $db_archive ));
+	}
 
 // Give the bucket a moment to get created if it doesn't exist yet
 
@@ -74,7 +90,7 @@
 The $notify_sitename backup just ran, successfully:
 
 Asset archive: $asset_archive_filename ($asset_archive_size)
-Database archive: $db_archive_filename ($db_archive_size)
+$summary
 	
 You can rest easy.
 
@@ -119,4 +135,3 @@ BODY;
 	}
 
 
-?>
