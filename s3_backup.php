@@ -34,8 +34,8 @@
 	$asset_archive_filename = 'backup-files-' . $date . '.tar.gz';
 	$asset_archive = $archive_path . $asset_archive_filename;
 	
-	// Zip
-	exec("(tar -cvf $asset_archive $path_to_archive) &> /dev/null &");
+	// Tar gz for better compression
+	exec("(tar -czf $asset_archive $path_to_archive) &> /dev/null");
 	$asset_archive_size = byteConvert(filesize($asset_archive));
 	
 	// Add to S3 upload batch
@@ -46,7 +46,7 @@
 	$db_archive = $archive_path . $db_archive_filename;
 
 	// Dump
-	exec("(mysqldump --opt --host=$db_host --user=$db_user --password=$db_pwd $db_name | gzip -9c > $db_archive) &> /dev/null &");
+	exec("(mysqldump --opt -h$db_host -u$db_user -p$db_pwd $db_name | gzip -9c > $db_archive) &> /dev/null");
 	$db_archive_size = byteConvert(filesize($db_archive));
 	
 	// Add to S3 upload batch
